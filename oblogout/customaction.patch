@@ -1,0 +1,142 @@
+--- oblogout/__init__.py									2020-09-15 21:12:13.000000000 +0100
++++ ./usr/lib/python2.7/site-packages/oblogout/__init__.py	2020-09-19 19:38:27.950450337 +0100
+@@ -77,7 +77,8 @@
+             gettext.install('oblogout', 'mo', unicode=1)  
+         else:   
+             gettext.install('oblogout', '%s/share/locale' % sys.prefix, unicode=1)      
+-        
++
++        self.defaultbuttons = ['cancel', 'logout', 'restart', 'shutdown', 'suspend', 'hibernate', 'safesuspend', 'lock', 'switch']  
+         # Load configuration file
+         self.load_config(config)
+                                         
+@@ -176,7 +177,7 @@
+         self.parser.read(config)
+         
+         # Set some safe defaults
+-	self.lock_before_suspend = False
++        self.lock_before_suspend = False
+         self.opacity = 50
+         self.button_theme = "default"
+         self.bgcolor = gtk.gdk.color_parse("black")
+@@ -190,8 +191,8 @@
+             else:
+                 self.usehal = True
+ 
+-	    if self.parser.has_option("settings","lock_before_suspend"):
+-		self.lock_before_suspend = self.parser.getboolean("settings","lock_before_suspend")
++        if self.parser.has_option("settings","lock_before_suspend"):
++            self.lock_before_suspend = self.parser.getboolean("settings","lock_before_suspend")
+             
+         if self.usehal:    
+             from dbushandler import DbusController
+@@ -207,27 +208,26 @@
+                 self.button_theme = self.parser.get("looks", "buttontheme")
+                 
+             if self.parser.has_option("looks", "bgcolor"):  
+-            	try:
+-                	self.bgcolor = gtk.gdk.color_parse(self.parser.get("looks", "bgcolor"))
++                try:
++                    self.bgcolor = gtk.gdk.color_parse(self.parser.get("looks", "bgcolor"))
+                 except:
+-                	self.logger.warning(_("Color %s is not a valid color, defaulting to black") % self.parser.get("looks", "bgcolor"))
+-                	self.bgcolor = gtk.gdk.color_parse("black")
++                    self.logger.warning(_("Color %s is not a valid color, defaulting to black") % self.parser.get("looks", "bgcolor"))
++                    self.bgcolor = gtk.gdk.color_parse("black")
+                 
+             if self.parser.has_option("looks", "opacity"):
+                 blist = self.parser.get("looks", "buttons")
+-	    
++        
+         # Parse shortcuts section and load them into a array for later reference.
+-	    if self.parser.has_section("shortcuts"):
+-	        self.shortcut_keys = self.parser.items("shortcuts")
+-	        self.logger.debug("Shortcut Options: %s" % self.shortcut_keys)
++        if self.parser.has_section("shortcuts"):
++            self.shortcut_keys = self.parser.items("shortcuts")
++            self.logger.debug("Shortcut Options: %s" % self.shortcut_keys)
+ 
+          
+         # Parse in commands section of the configuration file. Check for valid keys and set the attribs on self
+         if self.parser.has_section("commands"):
+             for key in self.parser.items("commands"):
+                 self.logger.debug("Setting cmd_%s as %s" % (key[0], key[1]))
+-                if key[0] in ['logout', 'restart', 'shutdown', 'suspend', 'hibernate', 'safesuspend', 'lock', 'switch']:
+-                    if key[0]: setattr(self, "cmd_" + key[0], key[1])
++                if key[0]: setattr(self, "cmd_" + key[0], key[1])
+ 
+         # Load theme information from local directory if local mode is set
+         if self.local_mode:
+@@ -248,30 +248,26 @@
+         
+ 
+         # Parse button list from config file.
+-        validbuttons = ['cancel', 'logout', 'restart', 'shutdown', 'suspend', 'hibernate', 'safesuspend', 'lock', 'switch']  
+-        buttonname = [_('cancel'), _('logout'), _('restart'), _('shutdown'), _('suspend'), _('hibernate'), _('safesuspend'), _('lock'), _('switch')]       
+ 
+         if not blist:
+-            list = validbuttons
++            list = self.defaultbuttons
+         elif blist == "default":
+-            list = validbuttons
++            list = self.defaultbuttons
+         else:
+             list = map(lambda button: string.strip(button), blist.split(","))
+                     
+         # Validate the button list
+         for button in list:
+-            if not button in validbuttons:
+-                self.logger.warning(_("Button %s is not a valid button name, removing") % button)
+-                list.remove(button)
+-            else:
+-                if self.usehal:
+-                    if not self.dbus.check_ability(button):
+-                        self.logger.warning(_("Can't %s, disabling button" % button))
+-                        list.remove(button)
++            if not button in self.defaultbuttons:
++                self.logger.warning(_("Warning: button %s is not a default button name") % button)
++            if self.usehal:
++                if not self.dbus.check_ability(button):
++                    self.logger.warning(_("Can't %s, disabling button" % button))
++                    list.remove(button)
+                         
+         if len(list) == 0:
+             self.logger.warning(_("No valid buttons found, resetting to defaults"))
+-            self.button_list = validbuttons
++            self.button_list = self.defaultbuttons
+         else:
+             self.logger.debug("Validated Button List: %s" % list)
+             self.button_list = list
+@@ -368,8 +364,8 @@
+         elif (data == 'suspend'):
+             self.window.hide()
+ 
+-	    if(self.lock_before_suspend):
+-	        self.__exec_cmd(self.cmd_lock)
++        if(self.lock_before_suspend):
++            self.__exec_cmd(self.cmd_lock)
+ 
+             if self.usehal:
+                 self.dbus.suspend()
+@@ -380,8 +376,8 @@
+         elif (data == 'hibernate'):
+             self.window.hide()
+ 
+-	    if(self.lock_before_suspend):
+-	        self.__exec_cmd(self.cmd_lock)
++        if(self.lock_before_suspend):
++            self.__exec_cmd(self.cmd_lock)
+ 
+             if self.usehal:
+                 self.dbus.hibernate()
+@@ -401,7 +397,9 @@
+             
+         elif (data == 'switch'):
+             self.__exec_cmd(self.cmd_switchuser)
+-
++        
++        if not data in self.defaultbuttons:
++            self.__exec_cmd(getattr(self,"cmd_"+str.lower(data)))
+         self.quit()
+             
+     def on_keypress(self, widget=None, event=None, data=None):
