@@ -15,12 +15,13 @@ if echo $yn | egrep -q '^(y|Y)'; then
 	fi
 	cd -
 	rm -rf xournalpp
+	cd xournalpp-git
 	curl https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD\?h\=xournalpp-git \
-		> xournalpp-git/PKGBUILD
-	sed -i 's|^url=.*|url="https://github.com/eleanor-clifford/xournalpp"|' \
-		xournalpp-git/PKGBUILD
-	sed -i 's|^source=.*|source=("${_pkgname}::git+${url}.git")|' \
-		xournalpp-git/PKGBUILD
+		> PKGBUILD
+	sed -i 's|^url=.*|url="https://github.com/eleanor-clifford/xournalpp"|' PKGBUILD
+	sed -i 's|^source=.*|source=("${_pkgname}::git+${url}.git")|' PKGBUILD
+	makepkg --printsrcinfo > .SRCINFO
+	cd -
 else
 	exit 1
 fi
@@ -38,3 +39,6 @@ if ! [ "$pkgver" = "$upstream_pkgver" ] || ! [ "$pkgrel" = "$upstream_pkgrel" ];
 then
 	echo -e "\\e[31m====> oblogout: upstream has been updated\\e[0m"
 fi
+
+# haskell-language-server-static
+echo -e "\\e[33m====> haskell-language-server-static must be edited manually\\e[0m"

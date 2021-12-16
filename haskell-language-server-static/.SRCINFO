@@ -1,0 +1,18 @@
+pkgbase = haskell-language-server-static
+	pkgdesc = Successor of ghcide & haskell-ide-engine. One IDE to rule them all.
+	pkgver = 1.5.1
+	pkgrel = 1
+	url = https://github.com/haskell/haskell-language-server
+	arch = x86_64
+	license = Apache
+	provides = haskell-language-server
+	conflicts = haskell-language-server
+	conflicts = haskell-language-server-git
+	source = haskell-language-server-Linux-8.10.7-1.5.1.gz::https://github.com/haskell/haskell-language-server/releases/download/1.5.1/haskell-language-server-Linux-8.10.7.gz
+	source = haskell-language-server-Linux-9.0.1-1.5.1.gz::https://github.com/haskell/haskell-language-server/releases/download/1.5.1/haskell-language-server-Linux-9.0.1.gz
+	source = haskell-language-server-wrapper-Linux-1.5.1.gz::https://github.com/haskell/haskell-language-server/releases/download/1.5.1/haskell-language-server-wrapper-Linux.gz
+	sha256sums = 61e52e2a796f7a876cad07932e593ebd725dd0821656bd1536b9b657608c23a0
+	sha256sums = 0a1e128ee5f1a994798ad0e0af1490722810622045f3baa5749f99d7cf5b780c
+	sha256sums = 595eb1cb1e7670010048016a49e71ecb64dce6b398f214c72a4d762d28fdbd3f
+
+pkgname = haskell-language-server-static

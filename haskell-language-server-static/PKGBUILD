@@ -1,0 +1,34 @@
+# Maintainer: Mateusz Galazyn <carbolymer at gmail.com>
+
+pkgname=haskell-language-server-static
+pkgver=1.5.1
+pkgrel=1
+pkgdesc="Successor of ghcide & haskell-ide-engine. One IDE to rule them all."
+arch=('x86_64')
+url="https://github.com/haskell/${pkgname%-static}"
+license=('Apache')
+depends=()
+provides=('haskell-language-server')
+conflicts=('haskell-language-server' 'haskell-language-server-git')
+source=()
+sha256sums=('61e52e2a796f7a876cad07932e593ebd725dd0821656bd1536b9b657608c23a0'
+            '0a1e128ee5f1a994798ad0e0af1490722810622045f3baa5749f99d7cf5b780c'
+            '595eb1cb1e7670010048016a49e71ecb64dce6b398f214c72a4d762d28fdbd3f')
+_prefix="${pkgname%-static}-Linux"
+_ghc_versions=('8.10.7' '9.0.1')
+
+for ver in ${_ghc_versions[@]}; do
+  source+=("${_prefix}-${ver}-${pkgver}.gz::${url}/releases/download/${pkgver}/${_prefix}-${ver}.gz")
+done
+
+# Wrapper is independent from ghc version
+source+=("${pkgname%-static}-wrapper-Linux-${pkgver}.gz::${url}/releases/download/${pkgver}/${pkgname%-static}-wrapper-Linux.gz")
+
+package() {
+  cd "${srcdir}"
+  for ver in ${_ghc_versions[@]}; do
+    install -Dm755 "${_prefix}-${ver}-${pkgver}" "${pkgdir}/usr/bin/"${pkgname%-static}-${ver}""
+  done
+  install -Dm755 "${pkgname%-static}-wrapper-Linux-${pkgver}" "${pkgdir}/usr/bin/${pkgname%-static}-wrapper"
+}
+
